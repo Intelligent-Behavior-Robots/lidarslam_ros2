@@ -18,16 +18,40 @@ def generate_launch_description():
         package='scanmatcher',
         executable='scanmatcher_node',
         parameters=[main_param_dir],
-        remappings=[('/input_cloud','/velodyne_points')],
+        #remappings=[('/input_cloud','/republished_points'),('/current_pose','/robot_pose') ],
+        remappings=[('/input_cloud','/republished_points')],
         output='screen'
         )
 
-    tf = launch_ros.actions.Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        arguments=['0','0','0','0','0','0','1','base_link','velodyne']
-        )
+    # tf = launch_ros.actions.Node(
+    #     package='tf2_ros',
+    #     executable='static_transform_publisher',
+    #     arguments=['0','0','0','0','0','0','1','base_link','laser_data_frame', '100']
+    #     )
 
+    tf2_broadcaster = launch_ros.actions.Node(
+        package='lidarslam',
+        executable='tf2_broadcaster.py',
+        name='tf2_broadcaster',
+    )
+
+    PCS = launch_ros.actions.Node(
+        package='lidarslam',
+        executable='Point_Cloud_Subscriber.py',
+        name='Point_Cloud_Subscriber',
+    )
+
+    PCP = launch_ros.actions.Node(
+        package='lidarslam',
+        executable='Point_Cloud_Publisher.py',
+        name='Point_Cloud_Publisher',
+    )
+    
+    point_cloud_republisher = launch_ros.actions.Node(
+        package='lidarslam',
+        executable='point_cloud_republisher.py',
+        name='point_cloud_republisher',
+    )
 
     graphbasedslam = launch_ros.actions.Node(
         package='graph_based_slam',
@@ -43,6 +67,10 @@ def generate_launch_description():
             default_value=main_param_dir,
             description='Full path to main parameter file to load'),
         mapping,
-        tf,
+        #tf,
+        # PCS,
+        # PCP,
         graphbasedslam,
+        tf2_broadcaster,
+        point_cloud_republisher,
             ])

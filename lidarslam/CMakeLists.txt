@@ -97,5 +97,12 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(PROGRAMS
+  src/tf2_broadcaster.py
+  src/point_cloud_republisher.py
+  src/Point_Cloud_Subscriber.py
+  src/Point_Cloud_Publisher.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 ament_package()

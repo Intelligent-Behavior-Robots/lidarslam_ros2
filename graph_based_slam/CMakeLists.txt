@@ -59,6 +59,13 @@ src/graph_based_slam_component.cpp
 
 target_compile_definitions(graph_based_slam_component PRIVATE "GS_GBS_BUILDING_DLL")
 
+
+include_directories(
+    include
+    /opt/ros/galactic/include
+    ${PCL_INCLUDE_DIRS}
+)
+
 ament_target_dependencies(graph_based_slam_component
   rclcpp 
   rclcpp_components 
@@ -90,10 +97,6 @@ g2o::solver_eigen
 ament_target_dependencies(graph_based_slam_node
   rclcpp)
 
-include_directories(
-    include
-    ${PCL_INCLUDE_DIRS}
-)
 link_directories(
   ${PCL_LIBRARY_DIRS}
 )

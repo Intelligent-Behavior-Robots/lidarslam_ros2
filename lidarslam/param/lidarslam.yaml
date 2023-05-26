@@ -23,7 +23,7 @@ scan_matcher:
     initial_pose_qy: 0.0
     initial_pose_qz: 0.0
     initial_pose_qw: 1.0
-    use_imu: false
+    use_imu: true
     use_odom: false
     debug_flag: false
 
@@ -31,13 +31,13 @@ graph_based_slam:
     ros__parameters:
       registration_method: "NDT"
       ndt_resolution: 1.0
-      ndt_num_threads: 2
+      ndt_num_threads: 2 
       voxel_leaf_size: 0.1
       loop_detection_period: 3000
       threshold_loop_closure_score: 0.7
-      distance_loop_closure: 100.0
-      range_of_searching_loop_closure: 20.0
-      search_submap_num: 2
+      distance_loop_closure: 5.0 # distance threshold for loop closure
+      range_of_searching_loop_closure: 10.0 # range threshold for loop closure 
+      search_submap_num: 2 # number of submaps to search for loop closure # the number of submap points before and after the revisit point used for registration
       num_adjacent_pose_cnstraints: 5
       use_save_map_in_loop: true
       debug_flag: true

@@ -171,17 +171,29 @@ void ScanMatcherComponent::initializePubSub()
   auto cloud_callback =
     [this](const typename sensor_msgs::msg::PointCloud2::SharedPtr msg) -> void
     {
+      //RCLCPP_INFO(get_logger(), "cloud is received. header frame_id: %s", msg->header.frame_id.c_str());
       if (initial_pose_received_) {
         sensor_msgs::msg::PointCloud2 transformed_msg;
-        try {
-          tf2::TimePoint time_point = tf2::TimePoint(
-            std::chrono::seconds(msg->header.stamp.sec) +
+        try {  
+          // auto cloudstamp = rclcpp::Time(msg->header.stamp); // create a variable to store the time
+          // cloudstamp = cloudstamp - rclcpp::Duration::from_seconds(0.15); // subtract 0.15 seconds
+
+          // msg->header.stamp = cloudstamp; // set the time to the message
+
+          tf2::TimePoint time_point = tf2::TimePoint( 
+            std::chrono::seconds(msg->header.stamp.sec) + 
             std::chrono::nanoseconds(msg->header.stamp.nanosec));
+
+          // RCLCPP_INFO(this->get_logger(),"%s" ,robot_frame_id_);
           const geometry_msgs::msg::TransformStamped transform = tfbuffer_.lookupTransform(
             robot_frame_id_, msg->header.frame_id, time_point);
+            
+
           tf2::doTransform(*msg, transformed_msg, transform); // TODO:slow now(https://github.com/ros/geometry2/pull/432)
-        } catch (tf2::TransformException & e) {
+        } catch (tf2::TransformException & e) {                                                                   
+         // RCLCPP_INFO(this->get_logger(), "sec: %d nanosec : %d", msg->header.stamp.sec, msg->header.stamp.nanosec); // -100000000
           RCLCPP_ERROR(this->get_logger(), "%s", e.what());
+          
           return;
         }
 
@@ -218,6 +230,7 @@ void ScanMatcherComponent::initializePubSub()
           Eigen::Matrix4f sim_trans = getTransformation(corrent_pose_stamped_.pose);
           pcl::PointCloud<pcl::PointXYZI>::Ptr transformed_cloud_ptr(
             new pcl::PointCloud<pcl::PointXYZI>());
+
           pcl::transformPointCloud(*cloud_ptr, *transformed_cloud_ptr, sim_trans);
           registration_->setInputTarget(transformed_cloud_ptr);
 
@@ -234,9 +247,11 @@ void ScanMatcherComponent::initializePubSub()
           submap.distance = 0;
           submap.pose = corrent_pose_stamped_.pose;
           submap.cloud = *cloud_msg_ptr;
+          //RCLCPP_INFO(get_logger(), "submap cloud header frame_id: %s, msg header frame_id: %s", submap.cloud.header.frame_id.c_str(), msg->header.frame_id.c_str());
           map_array_msg_.header = msg->header;
           map_array_msg_.submaps.push_back(submap);
 
+         // submap.cloud.header.frame_id = global_frame_id_; // publish map in global frame
           map_pub_->publish(submap.cloud);
 
           last_map_time_ = clock_.now();
